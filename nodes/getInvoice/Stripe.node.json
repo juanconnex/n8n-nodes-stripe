@@ -1,0 +1,20 @@
+{
+	"node": "n8n-nodes-base.Stripe",
+	"nodeVersion": "1.0",
+	"codexVersion": "1.0",
+	"categories": [
+		"Miscellaneous"
+	],
+	"resources": {
+		"credentialDocumentation": [
+			{
+				"url": "https://stripe.com/docs/api/authentication"
+			}
+		],
+		"primaryDocumentation": [
+			{
+				"url": "https://stripe.com/docs/api/invoices/retrieve"
+			}
+		]
+	}
+}
