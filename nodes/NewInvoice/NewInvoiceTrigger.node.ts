@@ -9,16 +9,6 @@ import {
     INodeTypeDescription,
     IWebhookResponseData,
  } from 'n8n-workflow';
-import { head } from 'request-promise-native';
-
-import {
-	autofriendApiRequest,
-} from './GenericFunctions';
-
-import {
-	snakeCase,
-} from 'change-case';
- 
  
  export class NewInvoiceTrigger implements INodeType {
     description: INodeTypeDescription = {
@@ -61,15 +51,7 @@ import {
 				description:
 					'WebhookURL where you want to reciebe notification about new invoices',
 			},
-            {
-                displayName: 'API KEY',
-				name: 'apikey',
-				type: 'string',
-				default: "sk_test_", //sk_test_51Kqfe8HFxoAnKny1eia7VEOjkVNPOrTRjEstTmD1FcYli6dSVJixoyv0YCWm560t3Rmyf1tvA8welpaQtthq4MN10055svZXCr
-				// eslint-disable-next-line n8n-nodes-base/node-param-description-wrong-for-simplify
-				description:
-					'Put your api key starting in sk_test_',
-            }
+            
         ],
     };
 
@@ -78,9 +60,12 @@ import {
 		default: {
 			async checkExists(this: IHookFunctions): Promise<boolean> {
 				const webhookurl = this.getNodeParameter('webhookurl') as string;
-                const apikey = this.getNodeParameter('apikey') as string
+                //const apikey = this.getNodeParameter('apikey') as string
                 const webhookData = this.getWorkflowStaticData('node');
-
+                const credentials = await this.getCredentials('Stripe') as IDataObject;
+                console.log(credentials)
+                const apikey = credentials.authorization;
+                
                 const response = await this.helpers.request({
                     url: 'https://api.stripe.com/v1/webhook_endpoints',
                     headers: {
@@ -88,6 +73,7 @@ import {
                     },
                     method: "GET"
                 })
+                
 				const responseParse = JSON.parse(response)
                
                 if(responseParse.data.length != 0){
@@ -104,8 +90,10 @@ import {
 			async create(this: IHookFunctions): Promise<boolean> {
 				
 				const webhookurl = this.getNodeParameter('webhookurl') as string;
-                const apikey = this.getNodeParameter('apikey') as string
-                
+                //const apikey = this.getNodeParameter('apikey') as string
+                const credentials = await this.getCredentials('Stripe') as IDataObject;
+
+                const apikey = credentials.authorization;
                 const response = await this.helpers.request({
                     url: `https://api.stripe.com/v1/webhook_endpoints?url=${webhookurl}&enabled_events[]=invoiceitem.created`,
                     headers: {
@@ -125,10 +113,12 @@ import {
            
             async delete(this: IHookFunctions): Promise<boolean> {
                 
-                const apikey = this.getNodeParameter('apikey') as string
+                //const apikey = this.getNodeParameter('apikey') as string
                 const webhookData = this.getWorkflowStaticData('node');
 				// TODO: Add HMAC-validation once either the JSON data can be used for it or there is a way to access the binary-payload-data
-				
+				const credentials = await this.getCredentials('Stripe') as IDataObject;
+
+                const apikey = credentials.authorization;
                 try {
                     const response = await this.helpers.request({
                         url: `https://api.stripe.com/v1/webhook_endpoints/${webhookData.webhookId}`,

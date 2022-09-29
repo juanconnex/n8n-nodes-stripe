@@ -12,35 +12,31 @@ import {
 	IHookFunctions,
 	IWebhookFunctions,
 } from 'n8n-workflow';
+export async function getCredentials(this: IExecuteFunctions, keys: any): Promise<any>{
+	const credentials = await this.getCredentials(keys) as IDataObject;
+	return credentials.apiKey;         
+}
+export async function stripeApiRequest(this: IExecuteFunctions, method: string, resource: string, body: any = {}, query: IDataObject = {}, uri?: string, option: IDataObject = {}): Promise<any> { // tslint:disable-line:no-any
 
-export async function autofriendApiRequest(this: IExecuteFunctions | IWebhookFunctions | IHookFunctions | ILoadOptionsFunctions, method: string, resource: string, body: any = {}, query: IDataObject = {}, uri?: string, option: IDataObject = {}): Promise<any> { // tslint:disable-line:no-any
+	const credentials = await this.getCredentials('Stripe') as IDataObject;
 
-	const credentials = await this.getCredentials('autofriendApi') as IDataObject;
+	const apikey = credentials.apiKey;
 
-	const apiKey = credentials.apiKey;
+	const endpoint = 'https://api.stripe.com/v1/webhook_endpoints';
 
-	const endpoint = 'https://api2.autopilothq.com/v1';
-
-	const options: OptionsWithUri = {
+	const response = await this.helpers.request({
+		url: endpoint,
 		headers: {
-			'Content-Type': 'application/json',
-			autopilotapikey: apiKey,
+			"Authorization": `Bearer ${apikey}`
 		},
-		method,
-		body,
-		qs: query,
-		uri: uri || `${endpoint}${resource}`,
-		json: true,
-	};
-	if (!Object.keys(body).length) {
-		delete options.body;
-	}
-	if (!Object.keys(query).length) {
-		delete options.qs;
-	}
+		method: "GET"
+	})
+	
+	
 
 	try {
-		return await this.helpers.request!(options);
+		const responseParse = JSON.parse(response)
+		return responseParse
 	} catch (error) {
 		if (error.response) {
 			const errorMessage = error.response.body.message || error.response.body.description || error.message;
