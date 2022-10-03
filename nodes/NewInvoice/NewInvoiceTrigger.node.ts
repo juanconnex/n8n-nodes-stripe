@@ -14,13 +14,13 @@ import {
     description: INodeTypeDescription = {
         displayName: 'NewInvoiceTrigger',
         name: 'newInvoiceTrigger',
-        icon: 'file:autofriend.svg',
+        icon: 'file:stripe-logo.jpg',
         group: ['trigger'],
         version: 1,
         subtitle: '={{$parameter["event"]}}',
-        description: 'Handle Autofriend events via webhooks',
+        description: 'Triggers when a new invoice is created',
         defaults: {
-            name: 'Autofriend Trigger',
+            name: 'New invoice trigger',
             color: '#6ad7b9',
         },
         inputs: [],
@@ -59,7 +59,8 @@ import {
 	webhookMethods = {
 		default: {
 			async checkExists(this: IHookFunctions): Promise<boolean> {
-				const webhookurl = this.getNodeParameter('webhookurl') as string;
+				
+				const webhookurl = this.getNodeWebhookUrl('default');
                 //const apikey = this.getNodeParameter('apikey') as string
                 const webhookData = this.getWorkflowStaticData('node');
                 const credentials = await this.getCredentials('Stripe') as IDataObject;
@@ -89,7 +90,7 @@ import {
 			},
 			async create(this: IHookFunctions): Promise<boolean> {
 				
-				const webhookurl = this.getNodeParameter('webhookurl') as string;
+				const webhookurl = this.getNodeWebhookUrl('default');
                 //const apikey = this.getNodeParameter('apikey') as string
                 const credentials = await this.getCredentials('Stripe') as IDataObject;
 
@@ -110,7 +111,6 @@ import {
 				// TODO: Add HMAC-validation once either the JSON data can be used for it or there is a way to access the binary-payload-data
 				return true;
 			},
-           
             async delete(this: IHookFunctions): Promise<boolean> {
                 
                 //const apikey = this.getNodeParameter('apikey') as string

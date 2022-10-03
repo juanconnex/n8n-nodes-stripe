@@ -19,7 +19,7 @@ export class GetInvoice implements INodeType {
        
         displayName: 'Get invoice',
         name: 'getinvoice',
-        icon: 'file:nasapics.svg',
+        icon: 'file:stripe-logo.jpg',
         group: ['transform'],
         version: 1,
         subtitle: '={{$parameter["operation"] + ": " + $parameter["resource"]}}',
